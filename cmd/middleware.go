@@ -8,10 +8,11 @@ import (
 	"github.com/justinas/nosurf"
 )
 
-func commonHeaders(next http.Handler) http.Handler {
+func (app *application) commonHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Note: This is split across multiple lines for readability. You don't
 		// need to do this in your own code.
+		app.logger.Info("Entrée dans commonHeaders")
 		w.Header().Set("Content-Security-Policy",
 			"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
@@ -36,6 +37,7 @@ func (app *application) logRequest(next http.Handler) http.Handler {
 }
 func (app *application) recoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.logger.Info("Entrée dans recoverPanic")
 		// Créez une fonction différée (qui sera toujours exécutée en cas d'événement
 		// panique alors que Go déroule la pile).
 		defer func() {
@@ -54,6 +56,7 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 }
 func (app *application) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.logger.Info("Entrée dans requireAuthentication")
 		// If the user is not authenticated, redirect them to the login page and
 		// return from the middleware chain so that no subsequent handlers in
 		// the chain are executed.
@@ -83,6 +86,7 @@ func noSurf(next http.Handler) http.Handler {
 }
 func (app *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.logger.Info("Entrée dans authenticate")
 		// Retrieve the authenticatedUserID value from the session using the
 		// GetInt() method. This will return the zero value for an int (0) if no
 		// "authenticatedUserID" value is in the session -- in which case we

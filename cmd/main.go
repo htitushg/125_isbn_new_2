@@ -19,6 +19,20 @@ import (
 	"github.com/go-playground/form/v4"
 )
 
+// Add a db struct field to hold the configuration settings for our database connection
+// pool. For now this only holds the DSN, which we will read in from a command-line flag.
+// Add maxOpenConns, maxIdleConns and maxIdleTime fields to hold the configuration
+// settings for the connection pool.
+type config struct {
+	port int
+	env  string
+	db   struct {
+		dsn          string
+		maxOpenConns int
+		maxIdleConns int
+		maxIdleTime  time.Duration
+	}
+}
 type application struct {
 	logger         *slog.Logger
 	snippets       *models.SnippetModel
@@ -33,9 +47,24 @@ type application struct {
 	username       string
 }
 
+var logs *os.File
+
 func main() {
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	// Ajouté le 29/05/2024 10h54
+	//var jsonHandler *slog.JSONHandler
+	//var err error
+	//var filename string
+	//filename = assert.Path + "logs/logs_" + time.Now().Format(time.DateOnly) + ".log"
+	////models.closeLog()
+	//logs, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	//if err != nil {
+	//	log.Println(models.GetCurrentFuncName(), slog.Any("output", err))
+	//}
+	//jsonHandler = slog.NewJSONHandler(logs, nil)
+	//logger := slog.New(jsonHandler)
+	// Fin Ajouté le 29/05/2024 10h54
 	addr := flag.String("addr", ":8090", "HTTP network address")
 	dsn := flag.String("dsn", donnees.NSD, "MySQL data source name")
 	flag.Parse()

@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"errors"
+	"strconv"
 
 	"github.com/go-playground/form/v4"
+	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/nosurf"
 
 	//"errors"
@@ -106,4 +108,23 @@ func (app *application) isAuthenticated(r *http.Request) bool {
 		return false
 	}
 	return isAuthenticated
+}
+
+// Retrieve the "id" URL parameter from the current request context, then convert it to
+// an integer and return it. If the operation isn't successful, return 0 and an error.
+func (app *application) readIDParam(r *http.Request) (int, error) {
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+	if err != nil || id < 1 {
+		return 0, errors.New("invalid id parameter")
+	}
+	return int(id), nil
+}
+
+// Retrieve the "id" URL parameter from the current request context, then convert it to
+// an integer and return it. If the operation isn't successful, return 0 and an error.
+func (app *application) readName(r *http.Request) (string, error) {
+	params := httprouter.ParamsFromContext(r.Context())
+	name := params.ByName("name")
+	return name, nil
 }

@@ -7,7 +7,6 @@ import (
 	"125_isbn_new/internal/validator"
 	"125_isbn_new/ui"
 	"errors"
-	"strconv"
 
 	//"125_isbn_new/ui"
 	"encoding/json"
@@ -28,6 +27,10 @@ le validateur de structure. L'intégration signifie que notre
 snippetCreateForm "hérite" de tous les champs et méthodes
 de notre structure Validator (y compris le champ FieldErrors).
 */
+type errorForm struct {
+	Numero  int
+	Message string
+}
 type snippetCreateForm struct {
 	Title               string `form:"title"`
 	Content             string `form:"content"`
@@ -437,7 +440,12 @@ func (app *application) LivresHandlerGet(w http.ResponseWriter, r *http.Request)
 func (app *application) CouvertureLivreGet(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("Entrée dans CouvertureLivreGet")
 	log.Println(models.GetCurrentFuncName())
-	nomImage := r.PathValue("name")
+
+	nomImage, err := app.readName(r)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 	img, err := os.ReadFile(assert.Path + "data/img/" + nomImage)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -483,15 +491,15 @@ func (app *application) index(w http.ResponseWriter, r *http.Request) {
 // Change the signature of the snippetView handler so it is defined as a method
 // against *application.
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
 		return
 	}
 	snippet, err := app.snippets.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
-			http.NotFound(w, r)
+			app.notFoundResponse(w, r)
 		} else {
 			app.serverError(w, r, err)
 		}
